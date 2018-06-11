@@ -21,6 +21,9 @@ import org.junit.Test;
  */
 public class ConfigUtilTest {
 
+	private static final String STRING_VAZIA = "";
+	private static final int QUANTIDADE_CONFIGURACOES = 15;
+
 	/**
 	 * Teste responsável por verificar se o método fábrica Test method for
 	 * {@link br.edu.ifrn.pip.util.ConfigUtil#getInstance()} não está retornando um
@@ -88,8 +91,19 @@ public class ConfigUtilTest {
 	 */
 	@Test
 	public void testRecuperarValorDeConfiguracaoSemValor() {
-		assertEquals("Deveria ter retornado um valor vazio.", "",
+		assertEquals("Deveria ter retornado um valor vazio.", STRING_VAZIA,
 				ConfigUtil.getInstance().recuperarValorDeConfiguracao("configSemValor"));
+	}
+
+	/**
+	 * Teste responsável por verificar se o método
+	 * {@link br.edu.ifrn.pip.util.ConfigUtil#recuperarValorDeConfiguracaoComValorPadrao(java.lang.String)}
+	 * retorna vazio quando a configuração solicitada não possui valor definido.
+	 */
+	@Test
+	public void testRecuperarValorDeConfiguracaoComValorPadraoSemValor() {
+		assertEquals("Deveria ter retornado o valor padrão.", STRING_VAZIA,
+				ConfigUtil.getInstance().recuperarValorDeConfiguracaoComValorPadrao("configSemValor", "123"));
 	}
 
 	/**
@@ -106,12 +120,80 @@ public class ConfigUtilTest {
 	/**
 	 * Teste responsável por verificar se o método
 	 * {@link br.edu.ifrn.pip.util.ConfigUtil#recuperarValorDeConfiguracao(java.lang.String)}
+	 * lança {@link IllegalArgumentException} quando a chave da configuração
+	 * solicitada é vazia.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void testRecuperarValorDeConfiguracaoChaveVazia() {
+		ConfigUtil.getInstance().recuperarValorDeConfiguracao(STRING_VAZIA);
+	}
+
+	/**
+	 * Teste responsável por verificar se o método
+	 * {@link br.edu.ifrn.pip.util.ConfigUtil#recuperarValorDeConfiguracao(java.lang.String)}
 	 * lança {@link IllegalArgumentException} quando o parâmetro informado
 	 * representa um identificador de configuração desconhecido.
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void testRecuperarValorDeConfiguracaoInxistente() {
 		ConfigUtil.getInstance().recuperarValorDeConfiguracao(UUID.randomUUID().toString());
+	}
+
+	/**
+	 * Teste responsável por verificar se o método
+	 * {@link br.edu.ifrn.pip.util.ConfigUtil#recuperarValorDeConfiguracaoComValorPadrao(java.lang.String)}
+	 * retorna o valor padrão quando o identificador de configuração é desconhecido
+	 * ou inexistente.
+	 */
+	@Test
+	public void testRecuperarValorDeConfiguracaoComValorPadraoInxistente() {
+		assertEquals("Deveria ter retornado o valor padrão.", "123", ConfigUtil.getInstance()
+				.recuperarValorDeConfiguracaoComValorPadrao(UUID.randomUUID().toString(), "123"));
+	}
+
+	/**
+	 * Teste responsável por verificar se o método
+	 * {@link br.edu.ifrn.pip.util.ConfigUtil#recuperarValorDeConfiguracaoComValorPadrao(java.lang.String)}
+	 * lança {@link IllegalArgumentException} quando o parâmetro informado
+	 * representa um identificador de configuração desconhecido e não é informado
+	 * nenhum valod padrão.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void testRecuperarValorDeConfiguracaoComValorPadraoNulo() {
+		ConfigUtil.getInstance().recuperarValorDeConfiguracaoComValorPadrao(UUID.randomUUID().toString(), null);
+	}
+
+	/**
+	 * Teste responsável por verificar se o método
+	 * {@link br.edu.ifrn.pip.util.ConfigUtil#recuperarValorDeConfiguracaoComValorPadrao(java.lang.String)}
+	 * retorna o valor padrão quando o identificador de configuração é vazio mas um
+	 * valor padrão é informado.
+	 */
+	@Test
+	public void testRecuperarValorDeConfiguracaoComValorPadraoChaveVazia() {
+		assertEquals("Deveria ter retornado o valor padrão.", "Um valor Padrão",
+				ConfigUtil.getInstance().recuperarValorDeConfiguracaoComValorPadrao(STRING_VAZIA, "Um valor Padrão"));
+	}
+
+	/**
+	 * Teste responsável por verificar se o método
+	 * {@link br.edu.ifrn.pip.util.ConfigUtil#recuperarValorDeConfiguracaoComValorPadrao(java.lang.String)}
+	 * lança {@link IllegalArgumentException} quando a chave da configuração
+	 * solicitada é vazia e não é informado nenhum valor padrão.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void testRecuperarValorDeConfiguracaoComValorPadraoChaveVaziaValorPadraoNulo() {
+		ConfigUtil.getInstance().recuperarValorDeConfiguracaoComValorPadrao(STRING_VAZIA, null);
+	}
+
+	/**
+	 * Teste responsável por verificar se o método
+	 * {@link br.edu.ifrn.pip.util.ConfigUtil#recuperarNomesDeTodasConfiguracoes()}
+	 */
+	@Test
+	public void testRecuperarNomesDeTodasConfiguracoes() {
+		assertEquals("Deveria ter recuperado " + QUANTIDADE_CONFIGURACOES + " configurações.", QUANTIDADE_CONFIGURACOES,
+				ConfigUtil.getInstance().recuperarNomesDeTodasConfiguracoes().size());
 	}
 
 }

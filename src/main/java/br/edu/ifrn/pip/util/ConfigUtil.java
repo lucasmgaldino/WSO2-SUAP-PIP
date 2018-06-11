@@ -6,6 +6,7 @@ package br.edu.ifrn.pip.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -51,17 +52,17 @@ public class ConfigUtil {
 	 * única vez.
 	 */
 	private ConfigUtil() {
-		log.info("Carregando o arquivo de configurações do PIP.");
+		ConfigUtil.log.info("Carregando o arquivo de configurações do PIP.");
 		InputStream inputStream = Thread.currentThread().getContextClassLoader()
 				.getResourceAsStream(ARQUIVO_CONFIGURACOES_PIP);
 		if (inputStream != null) {
 			try {
 				CONFIG_PROPERTIES.load(inputStream);
 			} catch (IOException exception) {
-				log.error("Ocorreu um erro ao carregar o arquivo de configurações.", exception);
+				ConfigUtil.log.error("Ocorreu um erro ao carregar o arquivo de configurações.", exception);
 			}
 		} else {
-			log.error("O arquivo de configurações '" + ARQUIVO_CONFIGURACOES_PIP + "' não foi encontrado.");
+			ConfigUtil.log.error("O arquivo de configurações '" + ARQUIVO_CONFIGURACOES_PIP + "' não foi encontrado.");
 		}
 	}
 
@@ -85,16 +86,59 @@ public class ConfigUtil {
 	 * @return um {@link String} que representa o valor associado à chave informada,
 	 *         no arquivo de configurações. Caso a chave informada não exista,
 	 * @throws IllegalArgumentException
-	 *             caso a configuração solicitada não exista ou ela não possua
-	 *             nenhum valor.
+	 *             caso a configuração solicitada não exista.
 	 */
 	public String recuperarValorDeConfiguracao(final String umIdentificadorDeConfiguracao) {
 		if (StringUtils.isBlank(umIdentificadorDeConfiguracao)
 				|| !CONFIG_PROPERTIES.containsKey(umIdentificadorDeConfiguracao)) {
-			throw new IllegalArgumentException("Identificador de configuração inválido.");
+			throw new IllegalArgumentException(
+					"Identificador de configuração inválido: " + umIdentificadorDeConfiguracao);
 		}
 		String valorConfiguracao = CONFIG_PROPERTIES.getProperty(umIdentificadorDeConfiguracao);
 		return StringUtils.deleteWhitespace(valorConfiguracao);
+	}
+
+	/**
+	 * Método reponsável por recuperar o valor de uma determinada configuração. Caso
+	 * esta não exista, um valor padrão poderá ser retornado, caso um seja
+	 * informado.
+	 *
+	 * @param umIdentificadorDeConfiguracao
+	 *            um {@link String} que representa uma chave de configuração
+	 *            definida no arquivo de configuração.
+	 * @param umValorPadrao
+	 *            um {@link String} que representa o valor padrão que será retornado
+	 *            caso a configuração não exista.
+	 * @return um {@link String} que representa o valor associado à chave informada,
+	 *         no arquivo de configurações. Caso a configuração não exista, ou não
+	 *         possua valor, e se um valor padrão for informado, este será
+	 *         retornado.
+	 * @throws IllegalArgumentException
+	 *             caso a configuração solicitada não exista ou ela não possua
+	 *             nenhum valor.
+	 */
+	public String recuperarValorDeConfiguracaoComValorPadrao(final String umIdentificadorDeConfiguracao,
+			final String umValorPadrao) {
+		if (StringUtils.isBlank(umIdentificadorDeConfiguracao)
+				|| !CONFIG_PROPERTIES.containsKey(umIdentificadorDeConfiguracao)) {
+			if (umValorPadrao != null) {
+				return umValorPadrao;
+			}
+			throw new IllegalArgumentException(
+					"Foi solicitada uma configuração inválida, e não foi informado valor padrão.");
+		}
+		String valorConfiguracao = CONFIG_PROPERTIES.getProperty(umIdentificadorDeConfiguracao, umValorPadrao);
+		return StringUtils.deleteWhitespace(valorConfiguracao);
+	}
+
+	/**
+	 * Método responsável por recuperar o nome de todas as configurações do PIP.
+	 *
+	 * @return um {@link Set} de {@link String} onde cada elemento representa o
+	 *         identificador de uma configuração do PIP.
+	 */
+	public Set<String> recuperarNomesDeTodasConfiguracoes() {
+		return CONFIG_PROPERTIES.stringPropertyNames();
 	}
 
 }

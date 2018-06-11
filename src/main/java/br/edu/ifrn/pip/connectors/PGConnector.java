@@ -1,11 +1,9 @@
 package br.edu.ifrn.pip.connectors;
 
-import java.sql.SQLException;
-
 import org.apache.commons.lang.StringUtils;
 
 import br.edu.ifrn.pip.AtributosConstantes;
-import br.edu.ifrn.pip.util.PostgresConnection;
+import br.edu.ifrn.pip.util.DatabaseConnection;
 
 public class PGConnector extends AbstractConnector {
 
@@ -17,19 +15,13 @@ public class PGConnector extends AbstractConnector {
 		String atributoId = super.getAtributoId();
 		String resultado = "";
 
-		try {
-			switch (atributoId) {
-			case AtributosConstantes.ATRIB_CENTRALSERV_DONOTICKET:
-				resultado = PostgresConnection.getInstance().buscarDonoTicket(buscaPor);
-				break;
+		switch (atributoId) {
+		case AtributosConstantes.ATRIB_CENTRALSERV_DONOTICKET:
+			resultado = DatabaseConnection.getInstance().buscarDonoTicket(buscaPor);
+			break;
 
-			default:
-				break;
-			}
-
-
-		} catch (SQLException e) {	//TODO: tratar no PostgresConnection
-			e.printStackTrace();
+		default:
+			break;
 		}
 
 		return resultado;

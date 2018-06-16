@@ -1,8 +1,6 @@
 package br.edu.ifrn.pip;
 
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
@@ -23,21 +21,7 @@ public class SuapAttributeFinder extends AbstractPIPAttributeFinder {
 	@Override
 	public void init(Properties properties) throws Exception {
 		SuapAttributeFinder.log.info("<<<<<<<<<<<<<<<<< Iniciando PIP " + getModuleName() + "... >>>>>>>>>>>>>>>>>");
-		imprimirAmbienteExecucao();
 		registrarAtributosSuportados();
-	}
-
-	private void imprimirAmbienteExecucao() {
-		SuapAttributeFinder.log.info("------------ PROPRIEDADES ------------");
-		Properties properties = System.getProperties();
-		for (Object key : properties.keySet()) {
-			SuapAttributeFinder.log.info(key + "=" + properties.getProperty(key.toString()));
-		}
-		SuapAttributeFinder.log.info("\n------------ ENVIRONMENT ------------");
-		Map<String, String> mapa = System.getenv();
-		for (Entry<String, String> entrada : mapa.entrySet()) {
-			SuapAttributeFinder.log.info(entrada.getKey() + "=" + entrada.getValue());
-		}
 	}
 
 	/**

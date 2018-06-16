@@ -6,12 +6,14 @@ package br.edu.ifrn.pip.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -143,33 +145,67 @@ public class ConfigUtil {
 
 	/**
 	 * Método responsável por realizar a leitura e carregamento do arquivo de
-	 * configurações do PIP.
+	 * configurações do PIP. Caso o arquivo de configuração não exista, será tentado
+	 * criar um arquivo com valores padrão.
 	 */
 	private void carregarArquivoDeConfiguracao() {
-		String diretorioArquivosConfiguracoesWSO2 = System.getProperty(PROPRIEDADE_DIRETORIO_CONFIG_WSO2);
+		final String diretorioArquivosConfiguracoesWSO2 = System.getProperty(PROPRIEDADE_DIRETORIO_CONFIG_WSO2);
 
 		Path pathArquivoConfig = null;
+		File arquivoConfig = null;
 		try {
 			pathArquivoConfig = Paths.get(diretorioArquivosConfiguracoesWSO2, ARQUIVO_CONFIGURACOES_PIP);
 		} catch (InvalidPathException exception) {
-			ConfigUtil.log.error("Não foi possível localizar o arquivo '" + diretorioArquivosConfiguracoesWSO2 + "'");
+			ConfigUtil.log.warn("Atenção! Não foi possível localizar o arquivo '" + diretorioArquivosConfiguracoesWSO2
+					+ File.separator + ARQUIVO_CONFIGURACOES_PIP
+					+ "'. Será criado um arquivo com valores padrão. Você deve atualizá-lo conforme sua necessidade.");
 		}
 
-		if (pathArquivoConfig != null) {
-			File arquivoConfig = pathArquivoConfig.toFile();
-			if (!arquivoConfig.exists()) {
+		if (pathArquivoConfig == null) {
+			criarArquivoConfiguracaoPadrao(diretorioArquivosConfiguracoesWSO2);
+		} else {
+			arquivoConfig = pathArquivoConfig.toFile();
+			if (arquivoConfig == null || !arquivoConfig.exists()) {
 				ConfigUtil.log
-				.error("O arquivo de configurações '" + ARQUIVO_CONFIGURACOES_PIP + "' não foi localizado.");
-			} else if (!arquivoConfig.canRead()) {
-				ConfigUtil.log.error(
-						"O arquivo de configurações '" + ARQUIVO_CONFIGURACOES_PIP + "' não tem permissão de leitura.");
-			} else {
-				try {
-					CONFIG_PROPERTIES.load(new FileInputStream(arquivoConfig));
-				} catch (IOException exception) {
-					ConfigUtil.log.error("Ocorreu um erro ao carregar o arquivo de configurações.", exception);
-				}
+				.warn("O arquivo de configurações '" + ARQUIVO_CONFIGURACOES_PIP
+						+ "' não foi localizado. Será criado um arquivo com valores padrão. Você deve atualizá-lo conforme sua necessidade.");
+				criarArquivoConfiguracaoPadrao(diretorioArquivosConfiguracoesWSO2);
 			}
+		}
+		arquivoConfig = pathArquivoConfig.toFile();
+		if (!arquivoConfig.exists()) {
+			ConfigUtil.log
+			.warn("O arquivo de configurações '" + ARQUIVO_CONFIGURACOES_PIP
+					+ "' não foi localizado. Será criado um arquivo com valores padrão. Você deve atualizá-lo conforme sua necessidade.");
+			criarArquivoConfiguracaoPadrao(diretorioArquivosConfiguracoesWSO2);
+		} else if (!arquivoConfig.canRead()) {
+			ConfigUtil.log.error(
+					"O arquivo de configurações '" + ARQUIVO_CONFIGURACOES_PIP + "' não tem permissão de leitura.");
+		} else {
+			try {
+				CONFIG_PROPERTIES.load(new FileInputStream(arquivoConfig));
+			} catch (IOException exception) {
+				ConfigUtil.log.error("Ocorreu um erro ao carregar o arquivo de configurações.", exception);
+			}
+		}
+	}
+
+	/**
+	 * Método responsável por criar um arquivo de configuração padrão, com base no
+	 * arquivo que está embutido na implementação atual do PIP.
+	 *
+	 * @param umDiretorioDeConfiguracao
+	 *            um {@link String} que representa o caminho do diretório onde os
+	 *            arquivos de configuração são armazenados.
+	 */
+	private void criarArquivoConfiguracaoPadrao(String umDiretorioDeConfiguracao) {
+		InputStream inputStream = Thread.currentThread().getContextClassLoader()
+				.getResourceAsStream(ARQUIVO_CONFIGURACOES_PIP);
+		try {
+			FileUtils.copyInputStreamToFile(inputStream, Paths.get(umDiretorioDeConfiguracao, ARQUIVO_CONFIGURACOES_PIP).toFile());
+		} catch (IOException exception) {
+			ConfigUtil.log.error(
+					"Não foi possível criar o arquivo de configuracões padrão.", exception);
 		}
 	}
 

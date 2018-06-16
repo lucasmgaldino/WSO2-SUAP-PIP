@@ -3,8 +3,12 @@
  */
 package br.edu.ifrn.pip.util;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.Set;
 
@@ -24,6 +28,12 @@ import br.edu.ifrn.pip.SuapAttributeFinder;
 public class ConfigUtil {
 
 	private static Log log = LogFactory.getLog(SuapAttributeFinder.class);
+
+	/**
+	 * Propriedade do sistema que define o diretório onde são armazenados os
+	 * arquivos de configurações do WSO2 Identity Server.
+	 */
+	private static final String PROPRIEDADE_DIRETORIO_CONFIG_WSO2 = "carbon.config.dir.path";
 
 	/**
 	 * Nome do arquivo de configurações utilizado. Este arquivo deve estar
@@ -53,17 +63,7 @@ public class ConfigUtil {
 	 */
 	private ConfigUtil() {
 		ConfigUtil.log.info("Carregando o arquivo de configurações do PIP.");
-		InputStream inputStream = Thread.currentThread().getContextClassLoader()
-				.getResourceAsStream(ARQUIVO_CONFIGURACOES_PIP);
-		if (inputStream != null) {
-			try {
-				CONFIG_PROPERTIES.load(inputStream);
-			} catch (IOException exception) {
-				ConfigUtil.log.error("Ocorreu um erro ao carregar o arquivo de configurações.", exception);
-			}
-		} else {
-			ConfigUtil.log.error("O arquivo de configurações '" + ARQUIVO_CONFIGURACOES_PIP + "' não foi encontrado.");
-		}
+		carregarArquivoDeConfiguracao();
 	}
 
 	/**
@@ -139,6 +139,38 @@ public class ConfigUtil {
 	 */
 	public Set<String> recuperarNomesDeTodasConfiguracoes() {
 		return CONFIG_PROPERTIES.stringPropertyNames();
+	}
+
+	/**
+	 * Método responsável por realizar a leitura e carregamento do arquivo de
+	 * configurações do PIP.
+	 */
+	private void carregarArquivoDeConfiguracao() {
+		String diretorioArquivosConfiguracoesWSO2 = System.getProperty(PROPRIEDADE_DIRETORIO_CONFIG_WSO2);
+
+		Path pathArquivoConfig = null;
+		try {
+			pathArquivoConfig = Paths.get(diretorioArquivosConfiguracoesWSO2, ARQUIVO_CONFIGURACOES_PIP);
+		} catch (InvalidPathException exception) {
+			ConfigUtil.log.error("Não foi possível localizar o arquivo '" + diretorioArquivosConfiguracoesWSO2 + "'");
+		}
+
+		if (pathArquivoConfig != null) {
+			File arquivoConfig = pathArquivoConfig.toFile();
+			if (!arquivoConfig.exists()) {
+				ConfigUtil.log
+				.error("O arquivo de configurações '" + ARQUIVO_CONFIGURACOES_PIP + "' não foi localizado.");
+			} else if (!arquivoConfig.canRead()) {
+				ConfigUtil.log.error(
+						"O arquivo de configurações '" + ARQUIVO_CONFIGURACOES_PIP + "' não tem permissão de leitura.");
+			} else {
+				try {
+					CONFIG_PROPERTIES.load(new FileInputStream(arquivoConfig));
+				} catch (IOException exception) {
+					ConfigUtil.log.error("Ocorreu um erro ao carregar o arquivo de configurações.", exception);
+				}
+			}
+		}
 	}
 
 }

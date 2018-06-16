@@ -1,6 +1,8 @@
 package br.edu.ifrn.pip;
 
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
@@ -15,13 +17,27 @@ import br.edu.ifrn.pip.util.ConfigUtil;
 public class SuapAttributeFinder extends AbstractPIPAttributeFinder {
 
 	private static Log log = LogFactory.getLog(SuapAttributeFinder.class);
-
+	private static final String PREFIXO_ATRIBUTOS_PIP = "pip.attribute.";
 	private Set<String> supportedAttributes = new HashSet<String>();
 
 	@Override
 	public void init(Properties properties) throws Exception {
 		SuapAttributeFinder.log.info("<<<<<<<<<<<<<<<<< Iniciando PIP " + getModuleName() + "... >>>>>>>>>>>>>>>>>");
+		imprimirAmbienteExecucao();
 		registrarAtributosSuportados();
+	}
+
+	private void imprimirAmbienteExecucao() {
+		SuapAttributeFinder.log.info("------------ PROPRIEDADES ------------");
+		Properties properties = System.getProperties();
+		for (Object key : properties.keySet()) {
+			SuapAttributeFinder.log.info(key + "=" + properties.getProperty(key.toString()));
+		}
+		SuapAttributeFinder.log.info("\n------------ ENVIRONMENT ------------");
+		Map<String, String> mapa = System.getenv();
+		for (Entry<String, String> entrada : mapa.entrySet()) {
+			SuapAttributeFinder.log.info(entrada.getKey() + "=" + entrada.getValue());
+		}
 	}
 
 	/**
@@ -35,8 +51,11 @@ public class SuapAttributeFinder extends AbstractPIPAttributeFinder {
 		}
 		Set<String> configuracoes = ConfigUtil.getInstance().recuperarNomesDeTodasConfiguracoes();
 		for (String config : configuracoes) {
-			if (config.startsWith("pip.attribute.")) {
-				this.supportedAttributes.add(dominoBase.concat(ConfigUtil.getInstance().recuperarValorDeConfiguracao(config)));
+			if (config.startsWith(PREFIXO_ATRIBUTOS_PIP)) {
+				String atributo = dominoBase.concat(config.replace(PREFIXO_ATRIBUTOS_PIP, ""));
+				if (this.supportedAttributes.add(atributo)) {
+					SuapAttributeFinder.log.info("\tAtributo '" + atributo + "' [registrado com sucesso]");
+				}
 			}
 		}
 	}

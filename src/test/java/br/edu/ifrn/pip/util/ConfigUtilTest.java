@@ -6,6 +6,7 @@ package br.edu.ifrn.pip.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.nio.file.Paths;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -13,6 +14,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.commons.io.FileUtils;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -21,8 +25,38 @@ import org.junit.Test;
  */
 public class ConfigUtilTest {
 
+	/**
+	 * Propriedade do sistema que define o diretório onde são armazenados os
+	 * arquivos de configurações do WSO2 Identity Server.
+	 */
+	private static final String PROPRIEDADE_DIRETORIO_CONFIG_WSO2 = "carbon.config.dir.path";
+
+	/**
+	 * Nome do arquivo de configurações utilizado. Este arquivo deve estar
+	 * localizado dentro do projeto.
+	 */
+	private static final String ARQUIVO_CONFIGURACOES_PIP = "wso2-pip-suap.properties";
 	private static final String STRING_VAZIA = "";
-	private static final int QUANTIDADE_CONFIGURACOES = 15;
+	private static final int QUANTIDADE_CONFIGURACOES = 13;
+
+	/**
+	 * Definindo o diretório de configurações do WSO2 como sendo o diretório
+	 * temporário.
+	 */
+	@BeforeClass
+	public static void setUp() {
+		FileUtils.deleteQuietly(Paths.get(PROPRIEDADE_DIRETORIO_CONFIG_WSO2, ARQUIVO_CONFIGURACOES_PIP).toFile());
+		System.setProperty(PROPRIEDADE_DIRETORIO_CONFIG_WSO2, System.getProperty("java.io.tmpdir"));
+	}
+
+	/**
+	 * Removendo a configuração do diretório do WSO2.
+	 */
+	@AfterClass
+	public static void tearDown() {
+		FileUtils.deleteQuietly(Paths.get(PROPRIEDADE_DIRETORIO_CONFIG_WSO2, ARQUIVO_CONFIGURACOES_PIP).toFile());
+		System.getProperties().remove(PROPRIEDADE_DIRETORIO_CONFIG_WSO2);
+	}
 
 	/**
 	 * Teste responsável por verificar se o método fábrica Test method for

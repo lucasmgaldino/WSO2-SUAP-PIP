@@ -68,7 +68,10 @@ public class Factory {
 			throw new IllegalArgumentException("O tipo de connector solicitado para criação é desconhecido.");
 		}
 		// remove domínio e mantém apenas URI
-		final String atributoUri = umTipoDeConnector.replace(AtributosConstantes.DOMINIO_BASE, "");
+		String atributoUri = umTipoDeConnector.replace(AtributosConstantes.DOMINIO_BASE, "");
+		if (!atributoUri.startsWith("pip.attribute.")) {
+			atributoUri = "pip.attribute." + atributoUri;
+		}
 
 		String classeConcretaConnector = ConfigUtil.getInstance().recuperarValorDeConfiguracao(atributoUri);
 		if (StringUtils.isBlank(classeConcretaConnector)) {

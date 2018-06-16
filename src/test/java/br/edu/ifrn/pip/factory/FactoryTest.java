@@ -87,11 +87,22 @@ public class FactoryTest {
 	/**
 	 * Teste responsável por verificar se o método
 	 * {@link br.edu.ifrn.pip.factory.Factory#criarConnector(java.lang.String)} cria
+	 * corretamente um {@link Connector} para um determinado tipo válido, utilizando apenas a URI.
+	 */
+	@Test
+	public void testCriarConnectorURI() {
+		Connector connector = Factory.getInstance().criarConnector("centralservicos/donoticket");
+		assertNotNull("Deveria ter criado corretamente o conector, pois o tipo existe.", connector);
+	}
+
+	/**
+	 * Teste responsável por verificar se o método
+	 * {@link br.edu.ifrn.pip.factory.Factory#criarConnector(java.lang.String)} cria
 	 * corretamente um {@link Connector} para um determinado tipo válido.
 	 */
 	@Test
 	public void testCriarConnector() {
-		Connector connector = Factory.getInstance().criarConnector("centralservicos/donoticket");
+		Connector connector = Factory.getInstance().criarConnector("pip.attribute.centralservicos/donoticket");
 		assertNotNull("Deveria ter criado corretamente o conector, pois o tipo existe.", connector);
 	}
 

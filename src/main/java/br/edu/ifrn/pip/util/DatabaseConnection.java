@@ -97,18 +97,20 @@ public class DatabaseConnection {
 	public String buscarDonoTicket(String stringBusca) {			//TODO: melhorar nome do método
 		String resultadoBusca = "";
 		try {
-			Integer idChamado = Integer.parseInt(stringBusca);
-			PreparedStatement pstmt = this.getConnection().prepareStatement("SELECT A.username " +										//TODO: usar constante
-					"FROM centralservicos_chamado C " +
-					"INNER JOIN auth_user A ON A.id = C.aberto_por_id " +
-					"WHERE C.id = ?");
-			pstmt.setInt(1, idChamado);
-			ResultSet rs = pstmt.executeQuery();
-			while (rs.next()) {
-				resultadoBusca = rs.getString(1);
+			if (this.getConnection() != null) {
+				Integer idChamado = Integer.parseInt(stringBusca);
+				PreparedStatement pstmt = this.getConnection().prepareStatement("SELECT A.username " +										//TODO: usar constante
+						"FROM centralservicos_chamado C " +
+						"INNER JOIN auth_user A ON A.id = C.aberto_por_id " +
+						"WHERE C.id = ?");
+				pstmt.setInt(1, idChamado);
+				ResultSet rs = pstmt.executeQuery();
+				while (rs.next()) {
+					resultadoBusca = rs.getString(1);
+				}
+				rs.close();
+				pstmt.close();
 			}
-			rs.close();
-			pstmt.close();
 		} catch (SQLException e) {
 			DatabaseConnection.log.error("Ocorreu um erro ao tentar recuperar o dono do ticket de id " + stringBusca,
 					e);
